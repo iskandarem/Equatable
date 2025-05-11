@@ -25,7 +25,7 @@ When handling a large number of instances or managing complex data models (commo
 
 You can easily install Equatable from NuGet:
 ```bash
-dotnet add package Equatable --version 1.0.2
+dotnet add package Equatable --version 1.0.3
 ```
 Or via the NuGet Package Manager in Visual Studio:
 
@@ -41,27 +41,6 @@ Instead of manually overriding `Equals`, `GetHashCode`, and `ToString` in every 
 
 ---
 
-## ✅ With `BaseEquatable` (Preferred)
-
-```csharp
-class Person : BaseEquatable
-{
-    public string? Name { get; set; }
-    public int Age { get; set; }
-
-    public override List<object?> Props => [Name, Age];
-
-    public override bool? Stringify => true;
-}
-```
-# Benefits
-  - No need to override Equals, GetHashCode, or ToString manually.
-
-  - Consistent and reliable structural equality.
-
-  - Easier to maintain and extend.
-
-  - Cleaner, DRY (Don't Repeat Yourself) code.
 # ❌ Without BaseEquatable (Manual Implementation)
 ```csharp
 class Person 
@@ -100,7 +79,28 @@ class Person
 ### Key Update:
   > **Note**: If your class has many properties, the implementation of `Equals` and `GetHashCode` can become more cumbersome and prone to errors. Each additional property you add to the class requires manual updates to the `Equals` and `GetHashCode` methods, leading to bloated code.
 
+---
+## ✅ With `BaseEquatable` (Preferred)
 
+```csharp
+class Person : BaseEquatable
+{
+    public string? Name { get; set; }
+    public int Age { get; set; }
+
+    public override List<object?> Props => [Name, Age];
+
+    public override bool? Stringify => true;
+}
+```
+# Benefits
+  - No need to override Equals, GetHashCode, or ToString manually.
+
+  - Consistent and reliable structural equality.
+
+  - Easier to maintain and extend.
+
+  - Cleaner, DRY (Don't Repeat Yourself) code.
 
 # Example of output
 ```csharp
