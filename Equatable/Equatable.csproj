@@ -9,7 +9,7 @@
     <Title>Equatable</Title>
     <PackageTags>IEquatable; Json; Equals;</PackageTags>
 	<Description>A lightweight source generator that automatically implements value-based equality (Equals, GetHashCode, IEquatable and ToString) for your C# record or class types.</Description>
-	<Version>1.0.3</Version>
+	<Version>1.0.4</Version>
   </PropertyGroup>
 
 </Project>
