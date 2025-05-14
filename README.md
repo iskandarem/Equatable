@@ -25,7 +25,7 @@ When handling a large number of instances or managing complex data models (commo
 
 You can easily install Equatable from NuGet:
 ```bash
-dotnet add package Equatable --version 1.0.3
+dotnet add package Equatable --version 1.0.4
 ```
 Or via the NuGet Package Manager in Visual Studio:
 
