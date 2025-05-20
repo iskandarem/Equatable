@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 
 namespace Equatable
 {
@@ -37,15 +33,7 @@ namespace Equatable
         /// </returns>
         public bool Equals(BaseEquatable? other)
         {
-            if (other == null) return false;
-            if (ReferenceEquals(other, this)) return true;
-            if (Props.Count != other.Props.Count) return false;
-            for (int i = 0; i < Props.Count; ++i)
-            {
-                if (ReferenceEquals(Props[i], null) != ReferenceEquals(other.Props[i], null)) return false;
-                if (!ReferenceEquals(Props[i], null) && !other.Props[i]!.Equals(Props[i])) return false;
-            }
-            return true;
+            return EqualsIterable(Props, other?.Props);
         }
 
         /// <summary>
@@ -94,6 +82,66 @@ namespace Equatable
                 return string.Join(", ", Props);
             }
             return base.ToString();
+        }
+
+
+        private static bool EqualsIterable(ICollection<object?>? a, ICollection<object?>? b)
+        {
+            if (a == null && b == null) return true;
+            if (a == null || b == null) return false;
+            if (a.Count != b.Count) return false;
+            for (int i = 0; i < a.Count; ++i)
+            {
+                var aElement = a.ElementAt(i);
+                var bElement = b.ElementAt(i);
+                bool isAICollection = IsICollectionGeneric(aElement!.GetType());
+                bool isBCollection = IsICollectionGeneric(bElement!.GetType());
+                if (ReferenceEquals(aElement, null) != ReferenceEquals(bElement, null)) return false;
+                if (!ReferenceEquals(aElement, null) && (!bElement!.Equals(aElement) && !(isAICollection && isBCollection))) return false;
+                if (isAICollection && isBCollection)
+                {
+                    var icollectionA = GetICollectionGeneric(aElement as ICollection);
+                    var icollectionB = GetICollectionGeneric(bElement as ICollection);
+                    if (!EqualsIterable(icollectionA, icollectionB)) return false;
+                }
+            }
+            return true;
+        }
+        /// <summary>
+        /// Checks if the given type implements the generic ICollection interface.
+        /// </summary>
+        /// <param name="type">
+        /// The type to check.
+        /// </param>
+        /// <returns> 
+        /// <c>true</c> if the type implements <c>ICollection&lt;T&gt;</c>; otherwise, <c>false</c>.
+        /// </returns>
+        private static bool IsICollectionGeneric(Type type)
+        {
+            return type.GetInterfaces()
+                    .Any(i => i.IsGenericType &&
+                                i.GetGenericTypeDefinition() == typeof(ICollection<>));
+        }
+        /// <summary>
+        /// Converts a non-generic ICollection to a generic ICollection of objects.
+        /// This is used to handle collections of different types in the equality comparison.
+        /// </summary>
+        /// <param name="collection">
+        /// The non-generic ICollection to convert.
+        /// </param>
+        /// <returns>
+        /// A generic ICollection of objects containing the elements of the original collection.
+        /// Returns null if the input collection is null.
+        /// </returns>
+        private static ICollection<object?>? GetICollectionGeneric(ICollection? collection)
+        {
+            if (collection == null) return null;
+            var list = new List<object?>(collection.Count);
+            foreach (var item in collection)
+            {
+                list.Add(item);
+            }
+            return list;
         }
 
     }
