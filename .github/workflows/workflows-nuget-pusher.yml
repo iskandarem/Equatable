@@ -12,6 +12,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Stop if commit is from GitHub Actions
+        run: |
+          AUTHOR="$(git log -1 --pretty=%an)"
+          if [[ "$AUTHOR" == "github-actions" ]]; then
+            echo "Commit made by GitHub Actions. Skipping..."
+            exit 0
+          fi
+
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -33,6 +41,14 @@ jobs:
         run: |
           FILE=$(find ./Equatable -name "*.csproj")
           sed -i "s|<Version>.*</Version>|<Version>${{ steps.get-version.outputs.new_version }}</Version>|" "$FILE"
+
+      - name: Commit and push new version
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add ./Equatable/*.csproj
+          git commit -m "chore: bump version to ${{ steps.get-version.outputs.new_version }}"
+          git push origin master
 
       - name: Restore dependencies
         run: dotnet restore

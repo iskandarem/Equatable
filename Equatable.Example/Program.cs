@@ -78,7 +78,8 @@ var MyDictionaryClass3 = new MyDictionaryClass
     MyProp = new Dictionary<object, object>
     {
         { "Key1", "Value1" },
-        { "Key2", "Value3" }
+        { "Key2", "Value2" },
+        { "Key3", "Value3" }
     }
 };
 
