@@ -1,4 +1,4 @@
-name: Publish NuGet Package
+name: Publish NuGet Package (Persistent version)
 
 on:
   push:
@@ -8,9 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout main code
+        uses: actions/checkout@v4
+        with:
+          ref: master
 
       - name: Stop if commit is from GitHub Actions
         run: |
@@ -20,37 +23,68 @@ jobs:
             exit 0
           fi
 
+      - name: Checkout version store branch
+        uses: actions/checkout@v4
+        with:
+          ref: version-store
+          path: version-store
+        continue-on-error: true  # First run will have no branch
+
+      - name: Load previous version
+        id: get-prev
+        run: |
+          if [ -f version-store/version.txt ]; then
+            VERSION=$(cat version-store/version.txt)
+            echo "Found previous version: $VERSION"
+          else
+            VERSION="1.0.7"
+            echo "No version file found, starting at $VERSION"
+            mkdir -p version-store
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump version from commit message
+        id: bump
+        run: |
+          VERSION=${{ steps.get-prev.outputs.version }}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          COMMIT_MSG="$(git log -1 --pretty=%B | tr '[:upper:]' '[:lower:]')"
+
+          if echo "$COMMIT_MSG" | grep -q "breaking"; then
+            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0; BUMP="major"
+          elif echo "$COMMIT_MSG" | grep -q "feat"; then
+            MINOR=$((MINOR + 1)); PATCH=0; BUMP="minor"
+          elif echo "$COMMIT_MSG" | grep -q "fix"; then
+            PATCH=$((PATCH + 1)); BUMP="patch"
+          else
+            PATCH=$((PATCH + 1)); BUMP="patch (default)"
+          fi
+
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "Bump type: $BUMP → $NEW_VERSION"
+          echo "$NEW_VERSION" > version-store/version.txt
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Save version in version-store
+        run: |
+          cd version-store
+          git init
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add version.txt
+          git commit -m "Update version to ${{ steps.bump.outputs.version }}"
+          git branch -M version-store
+          git push https://x-access-token:${{ secrets.ACTION_PUSH_TOKEN }}@github.com/${{ github.repository }}.git version-store --force
+
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: Get current version from .csproj
-        id: get-version
-        run: |
-          FILE=$(find ./Equatable -name "*.csproj")
-          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" "$FILE")
-          echo "Current version: $VERSION"
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-          PATCH=$((PATCH + 1))
-          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-          echo "New version: $NEW_VERSION"
-          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
-
       - name: Update version in .csproj
         run: |
           FILE=$(find ./Equatable -name "*.csproj")
-          sed -i "s|<Version>.*</Version>|<Version>${{ steps.get-version.outputs.new_version }}</Version>|" "$FILE"
-
-      
-      - name: Commit and push new version
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add ./Equatable/*.csproj
-          git commit -m "chore: bump version to ${{ steps.get-version.outputs.new_version }}"
-          git push https://x-access-token:${{ secrets.ACTION_PUSH_TOKEN }}@github.com/${{ github.repository }}.git HEAD:master
-
+          sed -i "s|<Version>.*</Version>|<Version>${{ steps.bump.outputs.version }}</Version>|" "$FILE"
 
       - name: Restore dependencies
         run: dotnet restore
@@ -62,4 +96,6 @@ jobs:
         run: dotnet pack --configuration Release --no-build --output ./nupkg
 
       - name: Publish to NuGet.org
-        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY_FOR_EQUATABLE }} --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push ./nupkg/*.nupkg \
+          --api-key ${{ secrets.NUGET_API_KEY_FOR_EQUATABLE }} \
+          --source https://api.nuget.org/v3/index.json

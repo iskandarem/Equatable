@@ -23,10 +23,10 @@ namespace Equatable
         public abstract bool? Stringify { get; }
 
         /// <summary>
-        /// Compares the current instance with another <see cref="global::BaseEquatable"/> object for equality.
+        /// Compares the current instance with another <see cref="BaseEquatable"/> object for equality.
         /// The comparison is done by checking if the <see cref="Props"/> of both instances are equal.
         /// </summary>
-        /// <param name="other">The other <see cref="global::BaseEquatable"/> instance to compare with.</param>
+        /// <param name="other">The other <see cref="BaseEquatable"/> instance to compare with.</param>
         /// <returns>
         /// <c>true</c> if the current instance and the other instance are considered equal;
         /// otherwise, <c>false</c>.
@@ -38,11 +38,11 @@ namespace Equatable
 
         /// <summary>
         /// Compares the current instance with another object for equality. This method
-        /// calls <see cref="Equals(Equatable?)"/> if the object is of type <see cref="global::BaseEquatable"/>.
+        /// calls <see cref="Equals(object?)"/> if the object is of type <see cref="BaseEquatable"/>.
         /// </summary>
         /// <param name="obj">The object to compare with.</param>
         /// <returns>
-        /// <c>true</c> if the object is an <see cref="global::BaseEquatable"/> and is equal to the current instance;
+        /// <c>true</c> if the object is an <see cref="BaseEquatable"/> and is equal to the current instance;
         /// otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object? obj)
@@ -94,9 +94,11 @@ namespace Equatable
             {
                 var aElement = a.ElementAt(i);
                 var bElement = b.ElementAt(i);
+                if (ReferenceEquals(aElement, null) && ReferenceEquals(bElement, null)) continue;
+                // If both elements are not null, check if they are equal
+                if (ReferenceEquals(aElement, null) || ReferenceEquals(bElement, null)) return false;
                 bool isAICollection = IsICollectionGeneric(aElement!.GetType());
                 bool isBCollection = IsICollectionGeneric(bElement!.GetType());
-                if (ReferenceEquals(aElement, null) != ReferenceEquals(bElement, null)) return false;
                 if (!ReferenceEquals(aElement, null) && (!bElement!.Equals(aElement) && !(isAICollection && isBCollection))) return false;
                 if (isAICollection && isBCollection)
                 {
