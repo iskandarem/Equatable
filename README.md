@@ -1,3 +1,6 @@
+
+[<center><img src="./logo.png" align="center" width="850"></center>](https://www.nuget.org/packages/Equatable)
+
 # Equatable
 
 **Equatable** is a C# library designed to simplify and standardize value-based equality in your classes and structs. By leveraging this utility, you can avoid repetitive boilerplate code typically associated with overriding `Equals()` and `GetHashCode()`.
@@ -25,7 +28,7 @@ When handling a large number of instances or managing complex data models (commo
 
 You can easily install Equatable from NuGet:
 ```bash
-dotnet add package Equatable --version 1.0.6
+dotnet add package Equatable --version 1.0.11
 ```
 Or via the NuGet Package Manager in Visual Studio:
 

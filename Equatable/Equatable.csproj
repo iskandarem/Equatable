@@ -14,5 +14,16 @@
   <RepositoryType>git</RepositoryType>
   <Version>1.0.7</Version>
   </PropertyGroup>
+  <PropertyGroup>
+    <!-- NuGet package icon -->
+    <PackageIcon>logo.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Include the logo file from the parent directory -->
+    <None Include="..\logo.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+
 
 </Project>
