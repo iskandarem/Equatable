@@ -52,13 +52,16 @@ jobs:
           VERSION=${{ steps.get-prev.outputs.version }}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
           COMMIT_MSG="$(git log -1 --pretty=%B | tr '[:upper:]' '[:lower:]')"
-
+          SHOULD_PUBLISH="false"
           if echo "$COMMIT_MSG" | grep -q "breaking"; then
             MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0; BUMP="major"
+            SHOULD_PUBLISH="true"
           elif echo "$COMMIT_MSG" | grep -q "feat"; then
             MINOR=$((MINOR + 1)); PATCH=0; BUMP="minor"
+            SHOULD_PUBLISH="true"
           elif echo "$COMMIT_MSG" | grep -q "fix"; then
             PATCH=$((PATCH + 1)); BUMP="patch"
+            SHOULD_PUBLISH="true"
           else
             echo "No version keyword found. Skipping publish."
             echo "publish=false" >> $GITHUB_OUTPUT
