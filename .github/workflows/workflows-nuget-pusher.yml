@@ -72,6 +72,7 @@ jobs:
           echo "Bump type: $BUMP → $NEW_VERSION"
           echo "$NEW_VERSION" > version-store/version.txt
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "publish=$SHOULD_PUBLISH" >> $GITHUB_OUTPUT
 
       - name: Save version in version-store
         if: steps.bump.outputs.publish == 'true'
