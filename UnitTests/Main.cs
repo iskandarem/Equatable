@@ -154,8 +154,8 @@ public class Main
         var user1 = _fixture.Create<User>();
         var user2 = new User(user1);
 
-        Assert.True(user1 == user2);
-        Assert.False(user1 != user2);
+        Assert.True(user1.Equals(user2));
+        Assert.False(user1 == user2);
     }
 
     [Fact]

@@ -61,13 +61,27 @@ namespace Equatable
         {
             int hash = 17;
             foreach (var prop in Props)
-            {
-                //Combine the hash codes of the properties
-                hash = hash * 31 + (prop?.GetHashCode() ?? 0);
-            }
+                hash = hash * 31 + GetDeepHashCode(prop);
             return hash;
         }
 
+        private static int GetDeepHashCode(object? obj)
+        {
+            if (obj == null)
+                return 0;
+
+            // If it’s a collection, combine hash codes of each element
+            if (obj is IEnumerable enumerable && !(obj is string))
+            {
+                int hash = 17;
+                foreach (var item in enumerable)
+                    hash = hash * 31 + GetDeepHashCode(item);
+                return hash;
+            }
+
+            // Normal object
+            return obj.GetHashCode();
+        }
 
         /// <summary>
         /// Returns a string representation of the current instance. If <see cref="Stringify"/> is true,
