@@ -60,7 +60,9 @@ jobs:
           elif echo "$COMMIT_MSG" | grep -q "fix"; then
             PATCH=$((PATCH + 1)); BUMP="patch"
           else
-            PATCH=$((PATCH + 1)); BUMP="patch (default)"
+            echo "No version keyword found. Skipping publish."
+            echo "publish=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
 
           NEW_VERSION="$MAJOR.$MINOR.$PATCH"
