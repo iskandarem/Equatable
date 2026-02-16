@@ -9,7 +9,6 @@ public class User : BaseEquatable
     public string? Email { get; set; }
     public string? PasswordHash { get; set; }
     public string? AvatarPath { get; set; }
-    [JsonIgnore]
     public int Rating { get; set; }
     public DateTime RegistrationDate { get; set; }
     public int StatusId { get; set; }
