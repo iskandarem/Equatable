@@ -71,6 +71,7 @@ jobs:
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Save version in version-store
+        if: steps.bump.outputs.publish == 'true'
         run: |
           cd version-store
           git init
@@ -87,6 +88,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Update version in .csproj
+        if: steps.bump.outputs.publish == 'true'
         run: |
           FILE=$(find ./Equatable -name "*.csproj")
           sed -i "s|<Version>.*</Version>|<Version>${{ steps.bump.outputs.version }}</Version>|" "$FILE"
@@ -96,9 +98,14 @@ jobs:
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
+      
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build
 
       - name: Pack NuGet package
+        if: steps.bump.outputs.publish == 'true'
         run: dotnet pack --configuration Release --no-build --output ./nupkg
 
       - name: Publish to NuGet.org
+        if: steps.bump.outputs.publish == 'true'
         run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY_FOR_EQUATABLE }} --source https://api.nuget.org/v3/index.json
