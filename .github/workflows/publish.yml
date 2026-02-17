@@ -15,7 +15,7 @@ jobs:
       packages: write
 
     env:
-      PROJECT_PATH: src/Equatable/Equatable.csproj
+      PROJECT_PATH: Equatable/Equatable.csproj
 
     steps:
       - name: Checkout repository
