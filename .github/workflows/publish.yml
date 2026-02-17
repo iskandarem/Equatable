@@ -1,4 +1,4 @@
-name: Publish
+name: Publish to GitHub Packages
 
 on:
   push:
@@ -14,28 +14,29 @@ jobs:
       contents: read
       packages: write
 
-    steps:
-      - uses: actions/checkout@v4
+    env:
+      PROJECT_PATH: src/Equatable/Equatable.csproj
 
-      - uses: actions/setup-dotnet@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
-      - run: dotnet restore
-      - run: dotnet build --configuration Release
-      - run: dotnet pack --configuration Release
+      - name: Restore project
+        run: dotnet restore $PROJECT_PATH
+
+      - name: Build project
+        run: dotnet build $PROJECT_PATH --configuration Release --no-restore
+
+      - name: Pack project
+        run: dotnet pack $PROJECT_PATH --configuration Release --no-build --output ./nupkg
 
       - name: Add GitHub Packages source
-        run: |
-          dotnet nuget add source \
-          --username ${{ github.actor }} \
-          --password ${{ secrets.GITHUB_TOKEN }} \
-          --store-password-in-clear-text \
-          --name github \
-          "https://nuget.pkg.github.com/iskandarem/index.json"
+        run: dotnet nuget add source --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text --name github "https://nuget.pkg.github.com/iskandarem/index.json"
 
-      - name: Publish to GitHub Packages
-        run: |
-          dotnet nuget push "bin/Release/*.nupkg" \
-          --source "github" \
-          --skip-duplicate
+      - name: Publish package to GitHub Packages
+        run: dotnet nuget push "./nupkg/*.nupkg" --source github --skip-duplicate
