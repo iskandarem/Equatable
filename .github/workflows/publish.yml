@@ -26,7 +26,8 @@ jobs:
       - run: dotnet pack --configuration Release
 
       - name: Add GitHub Packages source
-        run: dotnet nuget add source \
+        run: |
+          dotnet nuget add source \
           --username ${{ github.actor }} \
           --password ${{ secrets.GITHUB_TOKEN }} \
           --store-password-in-clear-text \
