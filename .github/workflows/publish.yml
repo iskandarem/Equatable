@@ -35,6 +35,7 @@ jobs:
           "https://nuget.pkg.github.com/iskandarem/index.json"
 
       - name: Publish to GitHub Packages
-        run: dotnet nuget push "bin/Release/*.nupkg" \
+        run: |
+          dotnet nuget push "bin/Release/*.nupkg" \
           --source "github" \
           --skip-duplicate
