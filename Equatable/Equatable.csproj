@@ -9,7 +9,8 @@
     <Title>Equatable</Title>
     <PackageTags>IEquatable; Json; Equals;</PackageTags>
 	<Description>A lightweight source generator that automatically implements value-based equality (Equals, GetHashCode, IEquatable and ToString) for your C# record or class types.</Description>
-	<RepositoryUrl>https://github.com/iskandarem/Equatable</RepositoryUrl>
+	<Authors>iskandarem</Authors>
+  <RepositoryUrl>https://github.com/iskandarem/Equatable</RepositoryUrl>
   <PackageProjectUrl>https://github.com/iskandarem/Equatable</PackageProjectUrl>
   <RepositoryType>git</RepositoryType>
   <Version>1.0.7</Version>
