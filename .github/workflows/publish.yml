@@ -21,6 +21,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Checkout version-store branch
+        uses: actions/checkout@v4
+        with:
+          ref: version-store
+          path: version-store
+
+      - name: Read version from version.txt
+        id: get_version
+        run: |
+          VERSION=$(cat version-store/version.txt)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Using version: $VERSION"
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -33,7 +46,7 @@ jobs:
         run: dotnet build $PROJECT_PATH --configuration Release --no-restore
 
       - name: Pack project
-        run: dotnet pack $PROJECT_PATH --configuration Release --no-build --output ./nupkg
+        run: dotnet pack $PROJECT_PATH --configuration Release --no-build --output ./nupkg /p:Version=${{ env.VERSION }}
 
       - name: Add GitHub Packages source
         run: dotnet nuget add source --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text --name github "https://nuget.pkg.github.com/iskandarem/index.json"
